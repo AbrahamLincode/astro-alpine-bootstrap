@@ -1,0 +1,22 @@
+{
+  "name": "",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@alpinejs/persist": "^3.12.0",
+    "@astrojs/alpinejs": "^0.2.1",
+    "alpinejs": "^3.12.0",
+    "astro": "^2.3.0",
+    "bootstrap": "^5.3.0-alpha3"
+  },
+  "devDependencies": {
+    "@types/alpinejs": "^3.7.1"
+  }
+}

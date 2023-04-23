@@ -1,0 +1,99 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Alpine from "alpinejs";
+---
+
+<Layout title="Filo">
+  <div x-data="filoData()" x-init="init">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Arama yapın" x-model="search">
+      <button class="btn btn-primary" type="button" x-on:click="filtrele">Ara</button>
+    </div>
+    <table class="table table-dark table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Marka</th>
+          <th>Model</th>
+          <th>Üretim Yılı</th>
+          <th>Kilometre</th>
+          <th>Fiyat</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="(filo, index) in filteredFilo" :key="index">
+          <tr>
+            <td x-text="filo.marka"></td>
+            <td x-text="filo.model"></td>
+            <td x-text="filo.model_yili"></td>
+            <td x-text="formatKilometre(filo.kilometre)"></td>
+            <td x-text="formatFiyat(filo.fiyat)"></td>
+            <td><button class="btn btn-success" x-on:click="satinAl(filo, index)">Satın Al</button></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+</Layout>
+
+<script>
+  document.addEventListener("alpine:init", () => {
+    async function filoGetir() {
+  let url = "http://localhost/gp_90210000187/server.side/verikontrol.php?action=filo";
+  try {
+    let res = await fetch(url);
+    console.log("Veri çekme işlemi tamamlandı:", res);
+    if (!res.ok) {
+      throw new Error(`Veri çekme işlemi başarısız oldu: ${res.status}`);
+    }
+    let result = await res.json();
+    console.log("Alınan veriler:", result);
+    return result;
+  } catch (err) {
+    console.log("Veri çekme işlemi sırasında bir hata oluştu:", err);
+    return [];
+  }
+}
+
+  
+    Alpine.data("filoData", () => ({
+      filo: [],
+      filteredFilo: [],
+      search: "",
+      async init() {
+        this.filo = await filoGetir();
+        const urlParams = new URLSearchParams(window.location.search);
+        const markaParam = urlParams.get("marka");
+  
+        if (markaParam) {
+          const searchRegex = new RegExp(markaParam, "i");
+          this.filteredFilo = this.filo.filter(filo => searchRegex.test(filo.marka));
+        } else {
+          this.filteredFilo = this.filo;
+        }
+      },
+      filtrele() {
+        const searchRegex = new RegExp(this.search, "i");
+        this.filteredFilo = this.filo.filter((filo) => {
+          return (
+            searchRegex.test(filo.marka) ||
+            searchRegex.test(filo.model)
+          );
+        });
+      },
+      satinAl(filo, index) {
+        const aracId = filo.id || index;
+        window.location.href = `/satin_al.astro?aracId=${encodeURIComponent(aracId)}`;
+      },
+      formatKilometre(kilometre) {
+        return new Intl.NumberFormat('tr-TR').format(kilometre)
+      },
+        formatFiyat(fiyat) {
+          return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(fiyat);
+        },
+      }));
+    });
+  
+    // Alpine.js'i başlat
+    Alpine.start();
+  
+  </script>
